@@ -9,5 +9,32 @@
             <input type="submit" value="Send Query">
             <!--<p> ${string} </p>-->
         </form>
+        <br>
+        {% for error in errors %}
+            <h4>{{ error }}</h4>
+          {% endfor %}
+        <br>
+    {% if results %}
+            <h2>Reference</h2>
+
+            <div id="results">
+              <table class="table table-striped" style="max-width: 300px;">
+                <!--<thead>-->
+                  <!--&lt;!&ndash;<tr>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<th>Word</th>&ndash;&gt;-->
+                    <!--&lt;!&ndash;<th>Count</th>&ndash;&gt;-->
+                  <!--&lt;!&ndash;</tr>&ndash;&gt;-->
+                <!--</thead>-->
+                {% for result in results%}
+                  <tr>
+                    <td>{{ result }}</td>
+                    <td>{{ result[1] }}</td>
+                  </tr>
+                {% endfor %}
+              </table>
+            </div>
+          {% endif %}
+
     </div>
+
 {% endblock %}
