@@ -42,7 +42,7 @@ def index():
             #            for mention in cluster.mentions]
             results = [[mention for mention in cluster.mentions]
                        for cluster in doc._.coref_clusters]
-            return render_template('home.html', errors=errors, results=results)
+            return render_template('home.html', errors=errors, results=results, text=text)
         else:
             errors.append("Query: \""+text+" \"")
             errors.append("No coreference or input in the query.")
