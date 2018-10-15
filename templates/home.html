@@ -32,6 +32,24 @@
                     <td>{{ result[1] }}</td>
                   </tr>
                 {% endfor %}
+
+
+              </table>
+            </div>
+          {% endif %}
+        {% if wiki %}
+            <h2>Wiki respond</h2>
+
+            <div id="wiki">
+              <table class="table table-striped" style="max-width: 300px;">
+
+
+                {% for word in wiki%}
+                  <tr>
+                    <td>{{ word }}</td>
+
+                  </tr>
+                {% endfor %}
               </table>
             </div>
           {% endif %}
