@@ -1,5 +1,6 @@
 from flask import Flask, render_template, request, jsonify
 import spacy
+import wikicrawler as wk
 # from Query import naive_output
 
 
@@ -18,20 +19,7 @@ def index():
     if request.method == "POST":
         text = request.form['text']
         doc = nlp(text)
-        # mentions = [{'start': mention.start_char,
-        #              'end': mention.end_char,
-        #              'text': mention.text,
-        #              'resolved': cluster.main.text
-        #              }
-        #             for cluster in doc._.coref_clusters
-        #             for mention in cluster.mentions]
-        # clusters = [{'cluster': cluster.main.text
-        #              }
-        #             for cluster in doc._.coref_clusters]
-        #
-        # resolved = doc._.coref_resolved
-        # r = request.get(text)
-        # print(r.text)
+
         if doc._.has_coref:
             # results = [{'start': mention.start_char,
             #             'end': mention.end_char,
@@ -42,11 +30,13 @@ def index():
             #            for mention in cluster.mentions]
             results = [[mention for mention in cluster.mentions]
                        for cluster in doc._.coref_clusters]
-            return render_template('home.html', errors=errors, results=results, text=text)
+            wiki = wk.wikiParser(text)
+            return render_template('home.html', errors=errors, results=results, text=text, wiki=wiki)
         else:
             errors.append("Query: \""+text+" \"")
             errors.append("No coreference or input in the query.")
-            return render_template('home.html', errors=errors)
+            wiki = wk.wikiParser(text)
+            return render_template('home.html', errors=errors, wiki=wiki)
     else:
         errors.append("No input in the query.")
         return render_template('home.html', errors=errors)
