@@ -1,6 +1,8 @@
-from flask import Flask, render_template, request, jsonify
+from flask import Flask, render_template, request, jsonify, Markup
+import markdown
 import spacy
 import wikicrawler as wk
+import wikipedia
 # from Query import naive_output
 
 
@@ -14,29 +16,39 @@ app = Flask(__name__)
 def index():
 
     errors = []
-    results = {}
+    num = 7
+    ratio = 0.1
 
     if request.method == "POST":
-        text = request.form['text']
-        doc = nlp(text)
+        name = request.form['text']
+        try:
+            origin, text = wk.replaceRefer(name)
+            doc = wk.summarizer(origin, text, num)
+            genDoc = wikipedia.page(name).content
+            results = doc
+            # gensimResults = []
+            # gensimSummary = nlp(wk.summarize(genDoc))
+            # i = 0
+            # for sent in gensimSummary.sents:
+            #     if i < num:
+            #         gensimResults.append(sent.text)
+            #         i += 1
+            #     else:
+            #         break
+            gensimResults = wk.summary_highlight2(genDoc, ratio)
+            results = Markup(markdown.markdown(results))
+            gensimResults = Markup(markdown.markdown(gensimResults))
+            return render_template('home.html', errors=errors, results=results, gensimResults=gensimResults)
 
-        if doc._.has_coref:
-            # results = [{'start': mention.start_char,
-            #             'end': mention.end_char,
-            #             'text': mention.text,
-            #             'resolved': cluster.main.text
-            #             }
-            #            for cluster in doc._.coref_clusters
-            #            for mention in cluster.mentions]
-            results = [[mention for mention in cluster.mentions]
-                       for cluster in doc._.coref_clusters]
-            wiki = wk.wikiParser(text)
-            return render_template('home.html', errors=errors, results=results, text=text, wiki=wiki)
-        else:
-            errors.append("Query: \""+text+" \"")
-            errors.append("No coreference or input in the query.")
-            wiki = wk.wikiParser(text)
-            return render_template('home.html', errors=errors, wiki=wiki)
+        except ValueError:
+            errors.append("Query: \""+name+" \"")
+            errors.append("Not correct name, enter again")
+            return render_template('home.html', errors=errors)
+
+        except wikipedia.exceptions.DisambiguationError:
+            errors.append("Query: \"" + name + " \"")
+            errors.append("Ambiguous name, enter again")
+            return render_template('home.html', errors=errors)
     else:
         errors.append("No input in the query.")
         return render_template('home.html', errors=errors)

@@ -15,44 +15,47 @@
           {% endfor %}
         <br>
     {% if results %}
-            <h2>Reference</h2>
+            <h2>Summarization Method 1</h2>
+            <div class = "row customrow" id = "result-div">
+                <p class = "flow-text" id = "results">{{results}}</p>
 
-            <div id="results">
-              <table class="table table-striped" style="max-width: 300px;">
-                <!--<thead>-->
-                  <!--&lt;!&ndash;<tr>&ndash;&gt;-->
-                    <!--&lt;!&ndash;<th>Word</th>&ndash;&gt;-->
-                    <!--&lt;!&ndash;<th>Count</th>&ndash;&gt;-->
-                  <!--&lt;!&ndash;</tr>&ndash;&gt;-->
-                <!--</thead>-->
-                  <h4>{{ text }}</h4>
-                {% for result in results%}
-                  <tr>
-                    <td>{{ result }}</td>
-                    <td>{{ result[1] }}</td>
-                  </tr>
-                {% endfor %}
-
-
-              </table>
             </div>
+            <!--<div id="results">-->
+              <!--<table class="table table-striped" style="max-width: 900px;">-->
+                <!--&lt;!&ndash;<thead>&ndash;&gt;-->
+                  <!--&lt;!&ndash;&lt;!&ndash;<tr>&ndash;&gt;&ndash;&gt;-->
+                    <!--&lt;!&ndash;&lt;!&ndash;<th>Word</th>&ndash;&gt;&ndash;&gt;-->
+                    <!--&lt;!&ndash;&lt;!&ndash;<th>Count</th>&ndash;&gt;&ndash;&gt;-->
+                  <!--&lt;!&ndash;&lt;!&ndash;</tr>&ndash;&gt;&ndash;&gt;-->
+                <!--&lt;!&ndash;</thead>&ndash;&gt;-->
+                  <!--<h4>{{ text }}</h4>-->
+                <!--{% for sent in results%}-->
+                  <!--<tr>-->
+                    <!--<td>{{ sent }}</td>-->
+                  <!--</tr>-->
+                <!--{% endfor %}-->
+                <!---->
+              <!--</table>-->
+            <!--</div>-->
           {% endif %}
-        {% if wiki %}
-            <h2>Wiki respond</h2>
+        {% if gensimResults %}
+            <h2>Summarization gensim method</h2>
 
-            <div id="wiki">
-              <table class="table table-striped" style="max-width: 300px;">
+        <p class = "flow-text" id = "gensimResults">{{gensimResults}}</p>
+
+            <!--<div id="gensimResults">-->
+              <!--<table class="table table-striped" style="max-width: 900px;">-->
 
 
-                {% for word in wiki%}
-                  <tr>
-                    <td>{{ word }}</td>
+                <!--{% for sent in gensimResults%}-->
+                  <!--<tr>-->
+                    <!--<td>{{ sent }}</td>-->
 
-                  </tr>
-                {% endfor %}
-              </table>
-            </div>
-          {% endif %}
+                  <!--</tr>-->
+                <!--{% endfor %}-->
+              <!--</table>-->
+            <!--</div>-->
+        {% endif %}
 
     </div>
 
