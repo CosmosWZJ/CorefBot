@@ -1,0 +1,111 @@
+from heapq import nlargest
+import wikicrawler as wk
+import requests
+import json
+import spacy
+from spacy.lang.en.stop_words import STOP_WORDS
+from gensim.summarization.textcleaner import clean_text_by_sentences as _clean_text_by_sentences
+from gensim.summarization.summarizer import _format_results
+from gensim.summarization.summarizer import summarize
+
+def summarizer(origintext, text, ratio):
+    docx = nlp(text)
+    mytokens = [token.text for token in docx]
+    # Build Word Frequency
+    # word.text is tokenization in spacy
+    word_frequencies = {}
+    for word in docx:
+        if word.text not in stopwords:
+            if word.text not in word_frequencies.keys():
+                word_frequencies[word.text] = 1
+            else:
+                word_frequencies[word.text] += 1
+    # Maximum Word Frequency
+    maximum_frequency = max(word_frequencies.values())
+    for word in word_frequencies.keys():
+        word_frequencies[word] = (word_frequencies[word] / maximum_frequency)
+    # frequency table = word_frequency
+
+    sentence_list = [sentence for sentence in docx.sents]
+    # Sentence Score via comparing each word with sentence
+    sentence_scores = {}
+    num_of_sents = 0
+
+    for sent in sentence_list:
+        num_of_sents += 1
+        for word in sent:
+            if word.text.lower() in word_frequencies.keys():
+                leng = len(sent.text.split(' '))
+                if num_of_sents < 2 or leng in range(4, 40):
+                    if sent not in sentence_scores.keys():
+                        sentence_scores[sent] = word_frequencies[word.text.lower()]
+                    else:
+                        sentence_scores[sent] += word_frequencies[word.text.lower()]
+
+    pos = 0
+    for sent in sentence_list:
+        if sent in sentence_scores.keys():
+            if num_of_sents < 100:
+                sentence_scores[sent] += 4 - pos
+            else:
+                sentence_scores[sent] += 8 - 2*pos
+        pos += 1
+
+    summarized_sentences = nlargest(ratio, sentence_scores, key=sentence_scores.get)
+    summarized_sentences = [sent.text for sent in summarized_sentences]
+    result = " ".join(summarized_sentences)
+    #print(summarized_sentences)
+
+    return result
+
+def genSummary(origin, ratio, wordcount):
+    summarized_sents = summarize(str(origin), ratio, wordcount)
+
+    original_sents = _format_results(_clean_text_by_sentences(origin), True)
+    extracted_sents = _format_results(_clean_text_by_sentences(summarized_sents), True)
+
+
+    return extracted_sents
+
+stopwords = list(STOP_WORDS)
+json_data = requests.get("https://www.forbes.com/ajax/list/data?year=2017&uri=power-women&type=person").content.decode('utf-8')
+data = [item for item in json.loads(json_data)]
+names = []
+for item in data:
+    names.append(item["name"])
+print(names)
+
+nlp = spacy.load('en_coref_md')
+print("Model loaded\n")
+
+
+corefSummaries = {}
+gensimSummaries = {}
+idealSummaries = {}
+
+# x = names[0]
+# a,b = wk.replaceRefer(x)
+# corefSummaries["angela"] = summarizer(a, b, 7)
+# gensimSummaries["angela"] = genSummary(a.text, 0.1, 120)
+
+# print(corefSummaries["angela"])
+
+for name in names:
+    try:
+        origin, text = wk.replaceRefer(name)
+        corefSummaries[name] = summarizer(origin, text, 7)
+        gensimSummaries[name] = genSummary(origin.text, 0.1, 120)
+        print("Finish:" + name)
+
+    except Exception as e:
+        print("Error occur: " + name)
+        print(e)
+        continue
+
+with open("/home/wang1292/Documents/corefSummaries.txt",'w') as json_file:
+    json.dump(corefSummaries, json_file)
+
+with open("/home/wang1292/Documents/genSummaries.txt", 'w') as json_file:
+    json.dump(gensimSummaries, json_file)
+
+print("1")
